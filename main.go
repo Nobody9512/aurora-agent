@@ -93,6 +93,12 @@ func main() {
 			continue
 		}
 
+		// **Agar input ichida "aurora" bo‘lsa, xabar chiqaramiz**
+		if strings.Contains(input, "aurora") || strings.Contains(input, "Aurora") {
+			// TODO: Aurora bajaryapti...
+			fmt.Println("Aurora bajaryapti...")
+		}
+
 		if input == "exit" || input == "quit" {
 			fmt.Println("Dasturdan chiqildi.")
 			break
