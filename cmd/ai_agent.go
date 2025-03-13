@@ -1,18 +1,31 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"os"
+	"time"
+
+	"github.com/sashabaranov/go-openai"
 )
 
 // AgentType represents the type of AI agent
 type AgentType string
 
 const (
-	// OpenAI agent type
 	OpenAI AgentType = "openai"
-	// Claude agent type (for future implementation)
 	Claude AgentType = "claude"
-	// Other agent types can be added here
+
+	// System prompt -> TODO: move to a config file
+	SystemPrompt = `
+	Your name is Aurora.
+	You are a helpful assistant that can answer questions and help with tasks.
+	You are currently in a terminal environment.
+	You can use the following commands:
+	
+	clear - to clear the terminal
+	`
 )
 
 // AIAgent interface for different AI providers
@@ -23,26 +36,75 @@ type AIAgent interface {
 
 // OpenAIAgent implements the AIAgent interface for OpenAI
 type OpenAIAgent struct {
-	apiKey string
+	client   *openai.Client
+	model    string
+	messages []openai.ChatCompletionMessage
 }
 
 // NewOpenAIAgent creates a new OpenAI agent
 func NewOpenAIAgent(apiKey string) *OpenAIAgent {
+
+	if apiKey == "" {
+		// Try to get API key from environment variable
+		apiKey = os.Getenv("OPENAI_API_KEY")
+		if apiKey == "" {
+			log.Fatal("Warning: OPENAI_API_KEY not set. Using demo mode.")
+			os.Exit(1)
+		}
+	}
+
+	client := openai.NewClient(apiKey)
+
 	return &OpenAIAgent{
-		apiKey: apiKey,
+		client: client,
+		model:  openai.GPT4oLatest, // Default model
+		messages: []openai.ChatCompletionMessage{
+			{
+				Role:    openai.ChatMessageRoleSystem,
+				Content: SystemPrompt,
+			},
+		},
 	}
 }
 
 // Query sends a prompt to OpenAI and returns the response
 func (a *OpenAIAgent) Query(prompt string) (string, error) {
-	// TODO: Implement actual OpenAI API call
-	// This is a placeholder implementation
-	return fmt.Sprintf("OpenAI response to: %s", prompt), nil
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	a.messages = append(a.messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: prompt,
+	})
+
+	resp, err := a.client.CreateChatCompletion(
+		ctx,
+		openai.ChatCompletionRequest{
+			Model:    a.model,
+			Messages: a.messages,
+		},
+	)
+
+	if err != nil {
+		return "", fmt.Errorf("OpenAI API error: %v", err)
+	}
+
+	if len(resp.Choices) == 0 {
+		return "", fmt.Errorf("no response from OpenAI")
+	}
+
+	return resp.Choices[0].Message.Content, nil
 }
 
 // Name returns the name of the agent
 func (a *OpenAIAgent) Name() string {
 	return string(OpenAI)
+}
+
+// SetModel sets the OpenAI model to use
+func (a *OpenAIAgent) SetModel(model string) {
+	a.model = model
 }
 
 // AgentManager manages different AI agents
@@ -55,7 +117,7 @@ type AgentManager struct {
 func NewAgentManager() *AgentManager {
 	// Create a default OpenAI agent
 	// In a real implementation, you would get the API key from environment or config
-	openAIAgent := NewOpenAIAgent("your-api-key")
+	openAIAgent := NewOpenAIAgent("")
 
 	agents := make(map[AgentType]AIAgent)
 	agents[OpenAI] = openAIAgent

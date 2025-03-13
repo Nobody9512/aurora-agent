@@ -145,6 +145,25 @@ func handleAIAgentCommands(input string) bool {
 		return true
 	}
 
+	// Check for setting OpenAI API key
+	if strings.HasPrefix(input, "set openai key") {
+		parts := strings.Fields(input)
+		if len(parts) < 4 {
+			fmt.Println("Usage: set openai key <your_api_key>")
+			return true
+		}
+
+		apiKey := parts[3]
+		// Set the API key in environment variable
+		os.Setenv("OPENAI_API_KEY", apiKey)
+
+		// Reinitialize the agent manager to use the new key
+		cmd.AgentMgr = cmd.NewAgentManager()
+
+		fmt.Println("OpenAI API key set successfully")
+		return true
+	}
+
 	// Check for agent status command
 	if input == "agent status" {
 		fmt.Printf("Current AI agent: %s\n", cmd.AgentMgr.GetActiveAgentName())
