@@ -8,4 +8,7 @@ require (
 	golang.org/x/term v0.30.0
 )
 
-require golang.org/x/sys v0.31.0 // indirect
+require (
+	github.com/sashabaranov/go-openai v1.38.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+)
