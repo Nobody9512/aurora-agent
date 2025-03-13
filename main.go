@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
 	"syscall"
 
@@ -14,6 +15,28 @@ import (
 
 var sudoPassword string
 var sudoEnabled bool
+
+// Faol jarayonni global saqlash (CTRL+C ushlab qolish uchun)
+var activeCmd *exec.Cmd
+
+// **Global signal channel**
+var sigs chan os.Signal
+
+func init() {
+	// **Bitta signal channel yaratamiz (ko‘p marta chaqirilmasligi uchun)**
+	sigs = make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT)
+
+	// **CTRL+C signalini ushlash (barcha jarayonlar uchun)**
+	go func() {
+		for range sigs {
+			if activeCmd != nil {
+				fmt.Println("\n[!] Jarayon to‘xtatildi")
+				activeCmd.Process.Signal(syscall.SIGINT) // Faqat faol jarayonni o‘ldiramiz
+			}
+		}
+	}()
+}
 
 func main() {
 	// **Foydalanuvchining default shell'ini aniqlash**
@@ -137,7 +160,10 @@ func runCommandWithPTY(cmd *exec.Cmd) {
 	}
 	defer ptmx.Close()
 
-	// PTY output'ni terminalga yo‘naltiramiz
+	// **Faol jarayonni saqlaymiz**
+	activeCmd = cmd
+
+	// **PTY output'ni terminalga yo‘naltiramiz**
 	go func() {
 		buf := make([]byte, 1024)
 		for {
@@ -149,6 +175,9 @@ func runCommandWithPTY(cmd *exec.Cmd) {
 		}
 	}()
 
-	// Buyruq bajarilishini kutish
+	// **Buyruq bajarilishini kutish**
 	cmd.Wait()
+
+	// **Jarayon tugagandan keyin activeCmd'ni tozalash**
+	activeCmd = nil
 }
