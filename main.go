@@ -85,7 +85,7 @@ func main() {
 			}
 
 			args = args[1:]
-			cmd := exec.Command(userShell, "-c", fmt.Sprintf("echo %s | sudo -S %s", sudoPassword, strings.Join(args, " ")))
+			cmd := exec.Command(userShell, "-i", "-c", fmt.Sprintf("echo %s | sudo -S -p '' %s", sudoPassword, strings.Join(args, " ")))
 			runCommandWithPTY(cmd)
 			continue
 		}
