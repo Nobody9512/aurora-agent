@@ -9,74 +9,69 @@ import (
 	"syscall"
 
 	"github.com/chzyer/readline"
-	"github.com/creack/pty"
 	"golang.org/x/term"
+
+	"aurora-agent/cmd"
+	"aurora-agent/utils"
 )
 
 var sudoPassword string
 var sudoEnabled bool
 
-// Faol jarayonni global saqlash (CTRL+C ushlab qolish uchun)
-var activeCmd *exec.Cmd
-
-// **Global signal channel**
+// Global signal channel
 var sigs chan os.Signal
 
 func init() {
-	// **Bitta signal channel yaratamiz (ko‘p marta chaqirilmasligi uchun)**
+	// Create a single signal channel (to avoid multiple calls)
 	sigs = make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT)
 
-	// **CTRL+C signalini ushlash (barcha jarayonlar uchun)**
+	// Catch CTRL+C signal (for all processes)
 	go func() {
 		for range sigs {
-			if activeCmd != nil {
-				fmt.Println("\n[!] Jarayon to‘xtatildi")
-				activeCmd.Process.Signal(syscall.SIGINT) // Faqat faol jarayonni o‘ldiramiz
+			if utils.ActiveCmd != nil {
+				fmt.Println("\n[!] Process terminated")
+				utils.ActiveCmd.Process.Signal(syscall.SIGINT) // Only kill the active process
 			}
 		}
 	}()
 }
 
 func main() {
-	// **Foydalanuvchining default shell'ini aniqlash**
-	userShell := os.Getenv("SHELL")
-	if userShell == "" {
-		userShell = "/bin/bash" // Agar aniqlanmasa, bash ishlatamiz
-		fmt.Println("SHELL aniqlanmadi, bash ishlatiladi")
-	}
+	// Determine user's default shell
+	userShell := cmd.GetDefaultShell()
 
-	// **--sudo flag'ini tekshiramiz**
+	// Check for --sudo flag
 	if len(os.Args) > 1 && os.Args[1] == "--sudo" {
-		fmt.Print("[sudo] parolni kiriting: ")
+		fmt.Print("[sudo] Enter password: ")
 
 		bytePassword, err := term.ReadPassword(int(syscall.Stdin))
 		fmt.Println()
 		if err != nil {
-			fmt.Println("Xatolik: Parolni o‘qib bo‘lmadi.")
+			fmt.Println("Error: Could not read password.")
 			os.Exit(1)
 		}
 		sudoPassword = strings.TrimSpace(string(bytePassword))
 		sudoEnabled = true
 
-		// **Parolni tekshirish**
-		if !checkSudoPassword(sudoPassword) {
-			fmt.Println("Xatolik: Noto‘g‘ri parol!")
+		// Verify password
+		if !cmd.CheckSudoPassword(sudoPassword) {
+			fmt.Println("Error: Incorrect password!")
 			os.Exit(1)
 		}
 
-		fmt.Println("Sudo rejimi faollashtirildi!")
+		fmt.Println("Sudo mode activated!")
 	}
 
-	// **Readline sozlamalari (Tab completion bilan)**
+	// Readline settings (with Tab completion)
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:          "> ",
 		HistoryFile:     "/tmp/shell-history.tmp",
-		AutoComplete:    readline.NewPrefixCompleter(getShellCommands()...),
+		AutoComplete:    readline.NewPrefixCompleter(cmd.GetShellCommands()...),
 		InterruptPrompt: "^C",
 	})
 	if err != nil {
-		fmt.Println("Xatolik: Terminalni o'qib bo‘lmadi.")
+		fmt.Println("Error: Could not read terminal.")
 		os.Exit(1)
 	}
 	defer rl.Close()
@@ -84,7 +79,7 @@ func main() {
 	for {
 		input, err := rl.Readline()
 		if err != nil {
-			fmt.Println("\nDasturdan chiqildi.")
+			fmt.Println("\nExiting program.")
 			break
 		}
 
@@ -93,97 +88,33 @@ func main() {
 			continue
 		}
 
-		// **Agar input ichida "aurora" bo‘lsa, xabar chiqaramiz**
-		if strings.Contains(input, "aurora") || strings.Contains(input, "Aurora") {
-			// TODO: Aurora bajaryapti...
-			fmt.Println("Aurora bajaryapti...")
+		// Process Aurora commands
+		if cmd.ProcessAuroraCommand(input) {
+			continue
 		}
 
 		if input == "exit" || input == "quit" {
-			fmt.Println("Dasturdan chiqildi.")
+			fmt.Println("Exiting program.")
 			break
 		}
 
 		args := strings.Fields(input)
 
-		// **Sudo tekshirish**
+		// Check for sudo
 		if args[0] == "sudo" {
 			if !sudoEnabled {
-				fmt.Println("Sudo rejimi yoqilmagan. --sudo bilan dastur ishga tushiring yoki parolni kiriting.")
+				fmt.Println("Sudo mode not enabled. Start the program with --sudo or enter password.")
 				continue
 			}
 
 			args = args[1:]
-			cmd := exec.Command(userShell, "-i", "-c", fmt.Sprintf("echo %s | sudo -S -p '' %s", sudoPassword, strings.Join(args, " ")))
-			runCommandWithPTY(cmd)
+			command := exec.Command(userShell, "-i", "-c", fmt.Sprintf("echo %s | sudo -S -p '' %s", sudoPassword, strings.Join(args, " ")))
+			utils.RunCommandWithPTY(command)
 			continue
 		}
 
-		// **Shell muhitida ishga tushirish (Ranglar yo‘qolmasligi uchun)**
-		cmd := exec.Command(userShell, "-i", "-c", input)
-		runCommandWithPTY(cmd)
+		// Run in shell environment (to preserve colors)
+		command := exec.Command(userShell, "-i", "-c", input)
+		utils.RunCommandWithPTY(command)
 	}
-}
-
-// **Parolni tekshirish funksiyasi**
-func checkSudoPassword(password string) bool {
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("echo %s | sudo -S -v", password))
-	err := cmd.Run()
-	return err == nil
-}
-
-// **Tab completion uchun mavjud buyruqlarni olish**
-func getShellCommands() []readline.PrefixCompleterInterface {
-	out, err := exec.Command("bash", "-c", "compgen -c").Output()
-	if err != nil {
-		fmt.Println("Xatolik: Buyruqlarni olishda muammo bo'ldi.")
-		return nil
-	}
-
-	commands := strings.Split(string(out), "\n")
-	var completions []readline.PrefixCompleterInterface
-
-	for _, cmd := range commands {
-		if cmd != "" {
-			completions = append(completions, readline.PcItem(cmd))
-		}
-	}
-
-	extraCommands := []string{"exit", "quit", "clear"}
-	for _, cmd := range extraCommands {
-		completions = append(completions, readline.PcItem(cmd))
-	}
-
-	return completions
-}
-
-// **PTY orqali ranglarni saqlab buyruqni ishga tushirish**
-func runCommandWithPTY(cmd *exec.Cmd) {
-	ptmx, err := pty.Start(cmd)
-	if err != nil {
-		fmt.Println("Xatolik:", err)
-		return
-	}
-	defer ptmx.Close()
-
-	// **Faol jarayonni saqlaymiz**
-	activeCmd = cmd
-
-	// **PTY output'ni terminalga yo‘naltiramiz**
-	go func() {
-		buf := make([]byte, 1024)
-		for {
-			n, err := ptmx.Read(buf)
-			if err != nil {
-				break
-			}
-			os.Stdout.Write(buf[:n])
-		}
-	}()
-
-	// **Buyruq bajarilishini kutish**
-	cmd.Wait()
-
-	// **Jarayon tugagandan keyin activeCmd'ni tozalash**
-	activeCmd = nil
 }
