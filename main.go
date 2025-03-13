@@ -88,10 +88,9 @@ func main() {
 			continue
 		}
 
-		// If input contains "aurora", show a message
-		if strings.Contains(input, "aurora") || strings.Contains(input, "Aurora") {
-			// TODO: Aurora is processing...
-			fmt.Println("Aurora is processing...")
+		// Process Aurora commands
+		if cmd.ProcessAuroraCommand(input) {
+			continue
 		}
 
 		if input == "exit" || input == "quit" {
