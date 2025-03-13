@@ -88,6 +88,11 @@ func main() {
 			continue
 		}
 
+		// Handle AI agent commands
+		if handleAIAgentCommands(input) {
+			continue
+		}
+
 		// Process Aurora commands
 		if cmd.ProcessAuroraCommand(input) {
 			continue
@@ -117,4 +122,34 @@ func main() {
 		command := exec.Command(userShell, "-i", "-c", input)
 		utils.RunCommandWithPTY(command)
 	}
+}
+
+// handleAIAgentCommands handles commands related to AI agents
+func handleAIAgentCommands(input string) bool {
+	// Check for agent switching command
+	if strings.HasPrefix(input, "use agent") {
+		parts := strings.Fields(input)
+		if len(parts) < 3 {
+			fmt.Println("Usage: use agent <agent_type>")
+			fmt.Println("Available agents: openai, claude")
+			return true
+		}
+
+		agentType := parts[2]
+		err := cmd.SetAIAgent(agentType)
+		if err != nil {
+			fmt.Printf("Error setting agent: %v\n", err)
+		} else {
+			fmt.Printf("Switched to %s agent\n", agentType)
+		}
+		return true
+	}
+
+	// Check for agent status command
+	if input == "agent status" {
+		fmt.Printf("Current AI agent: %s\n", cmd.AgentMgr.GetActiveAgentName())
+		return true
+	}
+
+	return false
 }
