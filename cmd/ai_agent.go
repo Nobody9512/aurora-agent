@@ -1,13 +1,13 @@
 package cmd
 
 import (
+	"aurora-agent/config"
+	"aurora-agent/utils"
 	"context"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/sashabaranov/go-openai"
@@ -19,37 +19,7 @@ type AgentType string
 const (
 	OpenAI AgentType = "openai"
 	Claude AgentType = "claude"
-
-	// System prompt -> TODO: move to a config file
-	// You are a helpful assistant that provides SHORT and CONCISE answers.
-	SystemPrompt = `
-Your name is Aurora.
-You are a helpful assistant that provides SHORT and CONCISE answers.
-You are currently in a terminal environment.
-You can use ANSI escape codes to color text:
-- Red: \033[31m
-- Green: \033[32m
-- Yellow: \033[33m
-- Blue: \033[34m
-- Magenta: \033[35m
-- Cyan: \033[36m
-- Reset: \033[0m
-- Bold: \033[1m
-- Underline: \033[4m
-
-Use appropriate colors to highlight important information, warnings, and errors.
-Example usage: \033[31mThis is red text\033[0m
-
-You can use the following commands:
-clear - to clear the terminal
-	`
 )
-
-// Ansi pattern
-var ansiPattern = regexp.MustCompile(`\\033\[\d+(;\d+)*m`)
-
-// Ansi code start
-var ansiStartPattern = regexp.MustCompile(`\\033\[`)
 
 // AIAgent interface for different AI providers
 type AIAgent interface {
@@ -85,7 +55,7 @@ func NewOpenAIAgent(apiKey string) *OpenAIAgent {
 		messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: SystemPrompt,
+				Content: config.SystemPrompt,
 			},
 		},
 	}
@@ -172,22 +142,22 @@ func (a *OpenAIAgent) StreamQuery(prompt string, writer io.Writer) error {
 			ansiBuffer += content
 
 			// If buffer contains ANSI code
-			if ansiPattern.MatchString(ansiBuffer) {
+			if config.AnsiPattern.MatchString(ansiBuffer) {
 				// Buffer has ANSI code, process it
-				processedBuffer := processANSICodes(ansiBuffer)
+				processedBuffer := utils.ProcessANSICodes(ansiBuffer)
 				fmt.Print(processedBuffer)
 				ansiBuffer = ""
-			} else if ansiStartPattern.MatchString(ansiBuffer) && len(ansiBuffer) > 30 {
+			} else if config.AnsiStartPattern.MatchString(ansiBuffer) && len(ansiBuffer) > 30 {
 				// If buffer contains the start of an ANSI code, but not the end
 				// and buffer length is more than 30, process it
 				// This can happen when ANSI code is in incorrect format
-				processedBuffer := processANSICodes(ansiBuffer)
+				processedBuffer := utils.ProcessANSICodes(ansiBuffer)
 				fmt.Print(processedBuffer)
 				ansiBuffer = ""
-			} else if len(ansiBuffer) > 20 && !ansiStartPattern.MatchString(ansiBuffer) {
+			} else if len(ansiBuffer) > 20 && !config.AnsiStartPattern.MatchString(ansiBuffer) {
 				// If buffer length is more than 20 and no ANSI code start is found,
 				// process it
-				processedBuffer := processANSICodes(ansiBuffer)
+				processedBuffer := utils.ProcessANSICodes(ansiBuffer)
 				fmt.Print(processedBuffer)
 				ansiBuffer = ""
 			}
@@ -196,7 +166,7 @@ func (a *OpenAIAgent) StreamQuery(prompt string, writer io.Writer) error {
 
 	// Process remaining buffer
 	if ansiBuffer != "" {
-		processedBuffer := processANSICodes(ansiBuffer)
+		processedBuffer := utils.ProcessANSICodes(ansiBuffer)
 		fmt.Print(processedBuffer)
 	}
 
@@ -207,38 +177,6 @@ func (a *OpenAIAgent) StreamQuery(prompt string, writer io.Writer) error {
 	})
 
 	return nil
-}
-
-// processANSICodes barcha turdagi ANSI kodlarini qayta ishlaydi
-func processANSICodes(text string) string {
-	// Oddiy escape qilingan kodlarni almashtiramiz (\\033)
-	result := strings.ReplaceAll(text, "\\033", "\033")
-
-	// Qo'sh escape qilingan kodlarni almashtiramiz (\\\\033)
-	result = strings.ReplaceAll(result, "\\\\033", "\033")
-
-	// Unicode escape qilingan kodlarni almashtiramiz (\u001b)
-	result = strings.ReplaceAll(result, "\\u001b", "\033")
-
-	// Agar hali ham escape qilingan kodlar qolgan bo'lsa
-	result = strings.ReplaceAll(result, "\\e", "\033")
-
-	// Agar hali ham escape qilingan kodlar qolgan bo'lsa
-	result = strings.ReplaceAll(result, "\\x1b", "\033")
-
-	// Agar hali ham escape qilingan kodlar qolgan bo'lsa
-	result = strings.ReplaceAll(result, "\\x1B", "\033")
-
-	// Agar hali ham escape qilingan kodlar qolgan bo'lsa
-	result = strings.ReplaceAll(result, "\\u001B", "\033")
-
-	// Agar hali ham escape qilingan kodlar qolgan bo'lsa
-	result = strings.ReplaceAll(result, "\\27", "\033")
-
-	// Agar hali ham escape qilingan kodlar qolgan bo'lsa
-	result = strings.ReplaceAll(result, "\\33", "\033")
-
-	return result
 }
 
 // Name returns the name of the agent

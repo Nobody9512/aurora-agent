@@ -1,5 +1,7 @@
 package config
 
+import "regexp"
+
 var ShellCommands = []string{
 	// User information and system data
 	"whoami", "id", "uname", "hostname", "uptime", "w", "who", "groups",
@@ -51,3 +53,32 @@ var ShellCommands = []string{
 	// Shell and scripts
 	"bash", "sh", "zsh", "fish", "dash", "tcsh", "csh", "ksh",
 }
+
+const (
+	SystemPrompt = `
+Your name is Aurora.
+You are a helpful assistant that provides SHORT and CONCISE answers.
+You are currently in a terminal environment.
+You can use ANSI escape codes to color text:
+- Red: \033[31m
+- Green: \033[32m
+- Yellow: \033[33m
+- Blue: \033[34m
+- Magenta: \033[35m
+- Cyan: \033[36m
+- Reset: \033[0m
+- Bold: \033[1m
+- Underline: \033[4m
+
+Use appropriate colors to highlight important information, warnings, and errors.
+Example usage: \033[31mThis is red text\033[0m
+
+You can use the following commands:
+clear - to clear the terminal
+`
+)
+
+var (
+	AnsiPattern      = regexp.MustCompile(`\\033\[\d+(;\d+)*m`)
+	AnsiStartPattern = regexp.MustCompile(`\\033\[`)
+)
