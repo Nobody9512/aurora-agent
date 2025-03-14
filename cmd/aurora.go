@@ -5,6 +5,8 @@ import (
 	"os"
 	"slices"
 	"strings"
+
+	"aurora-agent/config"
 )
 
 // Global agent manager instance
@@ -15,66 +17,19 @@ func init() {
 	AgentMgr = NewAgentManager()
 }
 
-var shellCommands = []string{
-	// User information and system data
-	"whoami", "id", "uname", "hostname", "uptime", "w", "who", "groups",
-	"whois", "finger", "last", "lastlog", "lastb", "lastcomm", "lastcomm",
-	"clear", "help", "exit", "quit", "cls", "clr",
-
-	// User and permissions
-	"su", "sudo", "passwd", "chown", "chmod", "chgrp", "umask",
-
-	// Folders and files
-	"ls", "ll", "la", "pwd", "cd", "mkdir", "rmdir", "touch", "rm", "mv", "cp",
-	"find", "locate", "updatedb", "tree",
-
-	// File and text manipulation
-	"cat", "tac", "less", "more", "head", "tail", "grep", "awk", "sed", "cut",
-	"sort", "uniq", "tee", "wc", "diff", "cmp",
-
-	// Processes and system monitoring
-	"ps", "top", "htop", "nice", "renice", "kill", "pkill", "jobs", "fg", "bg",
-	"nohup", "time", "strace", "lsof",
-
-	// Disk and file system
-	"df", "du", "mount", "umount", "fsck", "mkfs", "blkid", "fdisk", "parted",
-	"lsblk", "e2fsck", "sync", "tune2fs",
-
-	// Network and internet
-	"ping", "traceroute", "netstat", "ss", "ifconfig", "ip", "iwconfig",
-	"curl", "wget", "scp", "rsync", "nc", "telnet", "ftp", "sftp",
-
-	// Archiving and compression
-	"tar", "zip", "unzip", "gzip", "gunzip", "bzip2", "bunzip2", "xz", "7z",
-	"rar", "unrar",
-
-	// Software and package management
-	"apt", "apt-get", "yum", "dnf", "pacman", "zypper", "brew", "snap", "flatpak",
-	"dpkg", "rpm", "pip", "gem", "npm", "cargo", "go", "python", "ruby", "perl",
-
-	// Docker and containers
-	"docker", "docker-compose", "podman", "kubectl", "minikube",
-
-	// Git and version control
-	"git", "git clone", "git pull", "git push", "git commit", "git status",
-	"git log", "git branch", "git checkout", "git merge", "git rebase",
-
-	// Programming languages and compilers
-	"python", "python3", "node", "nodejs", "npm", "npx", "java", "javac",
-	"ruby", "perl", "php", "php-cli", "go", "rustc", "gcc", "g++",
-
-	// Shell and scripts
-	"bash", "sh", "zsh", "fish", "dash", "tcsh", "csh", "ksh",
-}
-
 // ProcessAuroraCommand handles Aurora-specific commands
 func ProcessAuroraCommand(input string) bool {
-	// Check if input contains "aurora"
+	// Check if input contains "aurora" or is not a shell command
 	if isAuroraCommand(input) || !isShellCommand(input) {
 		// Use streaming response
+		fmt.Print("\n") // Add a newline before the response for better readability
+
+		// Print a colored prompt to indicate AI response
+		fmt.Print("\033[36mAurora: \033[0m") // Cyan color for Aurora name
+
 		err := AgentMgr.StreamQuery(input, os.Stdout)
 		if err != nil {
-			fmt.Printf("\nError querying AI agent: %v\n", err)
+			fmt.Printf("\n\033[31mError querying AI agent: %v\033[0m\n", err) // Red error message
 		} else {
 			fmt.Println() // Add a newline after the streamed response
 		}
@@ -92,7 +47,7 @@ func isShellCommand(input string) bool {
 		return false
 	}
 
-	if slices.Contains(shellCommands, words[0]) {
+	if slices.Contains(config.ShellCommands, words[0]) {
 		return true
 	}
 
