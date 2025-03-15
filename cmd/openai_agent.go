@@ -321,31 +321,83 @@ func (a *OpenAIAgent) StreamQueryWithFunctionCalls(prompt string, writer io.Writ
 		processedOutput := utils.ProcessANSICodes(outputStr)
 		fmt.Print(processedOutput)
 
-		// Get the final response from the AI with the function result
+		// Get the final response from the AI with the function result using streaming
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
-		resp, err := a.client.CreateChatCompletion(
+		// Create a streaming request for the final response
+		stream, err := a.client.CreateChatCompletionStream(
 			ctx,
 			openai.ChatCompletionRequest{
 				Model:    a.model,
 				Messages: a.messages,
+				Stream:   true,
 			},
 		)
-
 		if err != nil {
-			return fmt.Errorf("OpenAI API error: %v", err)
+			return fmt.Errorf("OpenAI API stream error: %v", err)
+		}
+		defer stream.Close()
+
+		// Variable to collect the full response
+		finalResponse := ""
+
+		// Ansi buffer for the final response
+		ansiBuffer := ""
+
+		// Print a newline before the final response
+		fmt.Print("\n")
+
+		// Stream the final response
+		for {
+			response, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				return fmt.Errorf("stream error: %v", err)
+			}
+
+			// Get the content delta
+			content := response.Choices[0].Delta.Content
+			if content != "" {
+				// Collect the full response
+				finalResponse += content
+
+				// add to ansi buffer
+				ansiBuffer += content
+
+				// If buffer contains ANSI code
+				if config.AnsiPattern.MatchString(ansiBuffer) {
+					// Buffer has ANSI code, process it
+					processedBuffer := utils.ProcessANSICodes(ansiBuffer)
+					fmt.Print(processedBuffer)
+					ansiBuffer = ""
+				} else if config.AnsiStartPattern.MatchString(ansiBuffer) && len(ansiBuffer) > 100 {
+					// If buffer contains the start of an ANSI code, but not the end
+					// and buffer length is more than 100, process it
+					// This can happen when ANSI code is in incorrect format
+					processedBuffer := utils.ProcessANSICodes(ansiBuffer)
+					fmt.Print(processedBuffer)
+					ansiBuffer = ""
+				} else if len(ansiBuffer) > 80 && !config.AnsiStartPattern.MatchString(ansiBuffer) {
+					// If buffer length is more than 80 and no ANSI code start is found,
+					// process it
+					processedBuffer := utils.ProcessANSICodes(ansiBuffer)
+					fmt.Print(processedBuffer)
+					ansiBuffer = ""
+				}
+			}
 		}
 
-		if len(resp.Choices) == 0 {
-			return fmt.Errorf("no response from OpenAI")
+		// Process remaining buffer
+		if ansiBuffer != "" {
+			processedBuffer := utils.ProcessANSICodes(ansiBuffer)
+			fmt.Print(processedBuffer)
 		}
 
-		// Print the AI's response
-		finalResponse := resp.Choices[0].Message.Content
-		// Process ANSI codes in the final response
-		processedResponse := utils.ProcessANSICodes(finalResponse)
-		fmt.Print("\n" + processedResponse + "\n")
+		// Print a newline after the final response
+		fmt.Print("\n")
 
 		// Add the final response to message history
 		a.messages = append(a.messages, openai.ChatCompletionMessage{
