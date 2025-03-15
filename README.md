@@ -9,6 +9,7 @@ Aurora Agent is an interactive command-line shell application with integrated AI
 - **Sudo Support**: Execute privileged commands with sudo authentication
 - **ANSI Color Support**: Rich terminal output with color highlighting
 - **Custom Command Processing**: Special handling for Aurora-specific commands
+- **Cross-Platform Support**: Available for Windows, macOS, and Linux (amd64 and arm64)
 
 ## Installation
 
@@ -35,6 +36,10 @@ Aurora Agent is an interactive command-line shell application with integrated AI
    chmod +x aurora
    ```
 
+### Download Pre-built Binaries
+
+You can download pre-built binaries for your platform from the [Releases](https://github.com/yourusername/aurora-agent/releases) page.
+
 ## Usage
 
 ### Basic Usage
@@ -54,6 +59,15 @@ Run Aurora Agent with sudo privileges:
 ```
 
 You will be prompted to enter your sudo password.
+
+### Check Version
+
+Display the current version of Aurora Agent:
+
+```
+> version
+Aurora Agent version: v1.0.0
+```
 
 ### AI Commands
 
@@ -109,6 +123,23 @@ The system prompt for the AI agent can be configured in `config/config.go`.
   - `pty.go`: Pseudo-terminal handling
   - `ansi.go`: ANSI code processing
 - `main.go`: Main application entry point
+- `.github/workflows/`: GitHub Actions workflows
+  - `release.yml`: Automated release workflow for creating releases with cross-platform binaries
+
+## Releases
+
+New releases are automatically created when a new tag is pushed to the repository. The release process:
+
+1. Builds binaries for multiple platforms (Windows, macOS, Linux) and architectures (amd64, arm64)
+2. Creates a GitHub Release with the tag name
+3. Attaches all built binaries to the release
+
+To create a new release:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 ## License
 

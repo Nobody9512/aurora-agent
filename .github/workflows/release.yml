@@ -1,0 +1,82 @@
+name: Release Aurora Agent
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          check-latest: true
+      
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Aurora Agent ${{ env.VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+      
+      - name: Build for all platforms
+        run: |
+          mkdir -p dist
+          
+          # Build for Linux
+          GOOS=linux GOARCH=amd64 go build -o dist/aurora-agent-linux-amd64 -ldflags="-X main.Version=${{ env.VERSION }}" .
+          GOOS=linux GOARCH=arm64 go build -o dist/aurora-agent-linux-arm64 -ldflags="-X main.Version=${{ env.VERSION }}" .
+          
+          # Build for macOS
+          GOOS=darwin GOARCH=amd64 go build -o dist/aurora-agent-darwin-amd64 -ldflags="-X main.Version=${{ env.VERSION }}" .
+          GOOS=darwin GOARCH=arm64 go build -o dist/aurora-agent-darwin-arm64 -ldflags="-X main.Version=${{ env.VERSION }}" .
+          
+          # Build for Windows
+          GOOS=windows GOARCH=amd64 go build -o dist/aurora-agent-windows-amd64.exe -ldflags="-X main.Version=${{ env.VERSION }}" .
+          GOOS=windows GOARCH=arm64 go build -o dist/aurora-agent-windows-arm64.exe -ldflags="-X main.Version=${{ env.VERSION }}" .
+          
+          # Create zip archives
+          cd dist
+          
+          # Linux
+          tar -czvf aurora-agent-linux-amd64.tar.gz aurora-agent-linux-amd64
+          tar -czvf aurora-agent-linux-arm64.tar.gz aurora-agent-linux-arm64
+          
+          # macOS
+          tar -czvf aurora-agent-darwin-amd64.tar.gz aurora-agent-darwin-amd64
+          tar -czvf aurora-agent-darwin-arm64.tar.gz aurora-agent-darwin-arm64
+          
+          # Windows
+          zip aurora-agent-windows-amd64.zip aurora-agent-windows-amd64.exe
+          zip aurora-agent-windows-arm64.zip aurora-agent-windows-arm64.exe
+      
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/aurora-agent-linux-amd64.tar.gz
+            dist/aurora-agent-linux-arm64.tar.gz
+            dist/aurora-agent-darwin-amd64.tar.gz
+            dist/aurora-agent-darwin-arm64.tar.gz
+            dist/aurora-agent-windows-amd64.zip
+            dist/aurora-agent-windows-arm64.zip
+          tag_name: ${{ env.VERSION }} 

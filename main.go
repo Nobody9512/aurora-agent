@@ -15,6 +15,8 @@ import (
 	"aurora-agent/utils"
 )
 
+// Version will be set during build time
+var Version = "dev"
 var sudoPassword string
 var sudoEnabled bool
 
@@ -122,7 +124,7 @@ func main() {
 				}
 				continue
 			}
-			
+
 			// Handle cd with path argument
 			err := os.Chdir(args[1])
 			if err != nil {
@@ -158,7 +160,7 @@ func getPrompt() string {
 	if err != nil {
 		return "> "
 	}
-	
+
 	// Get the last part of the path (current directory name)
 	parts := strings.Split(pwd, string(os.PathSeparator))
 	currentDir := parts[len(parts)-1]
@@ -166,7 +168,7 @@ func getPrompt() string {
 		// Handle root directory case
 		currentDir = parts[len(parts)-2]
 	}
-	
+
 	// ANSI color codes for blue (primary color)
 	// \033[34m sets text to blue, \033[0m resets color
 	return "\033[34m" + currentDir + "\033[0m -> "
@@ -174,6 +176,12 @@ func getPrompt() string {
 
 // handleAIAgentCommands handles commands related to AI agents
 func handleAIAgentCommands(input string) bool {
+	// Check for version command
+	if input == "version" {
+		fmt.Printf("Aurora Agent version: %s\n", Version)
+		return true
+	}
+
 	// Check for agent switching command
 	if strings.HasPrefix(input, "use agent") {
 		parts := strings.Fields(input)
