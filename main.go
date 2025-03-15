@@ -152,13 +152,24 @@ func main() {
 	}
 }
 
-// getPrompt returns a prompt string with the current working directory
+// getPrompt returns a prompt string with only the current directory name in color
 func getPrompt() string {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return "> "
 	}
-	return pwd + " > "
+	
+	// Get the last part of the path (current directory name)
+	parts := strings.Split(pwd, string(os.PathSeparator))
+	currentDir := parts[len(parts)-1]
+	if currentDir == "" && len(parts) > 1 {
+		// Handle root directory case
+		currentDir = parts[len(parts)-2]
+	}
+	
+	// ANSI color codes for blue (primary color)
+	// \033[34m sets text to blue, \033[0m resets color
+	return "\033[34m" + currentDir + "\033[0m -> "
 }
 
 // handleAIAgentCommands handles commands related to AI agents
