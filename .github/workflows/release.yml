@@ -79,4 +79,5 @@ jobs:
             dist/aurora-agent-darwin-arm64.tar.gz
             dist/aurora-agent-windows-amd64.zip
             dist/aurora-agent-windows-arm64.zip
+            install.sh
           tag_name: ${{ env.VERSION }} 

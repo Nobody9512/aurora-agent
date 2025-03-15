@@ -21,12 +21,14 @@ Aurora Agent is an interactive command-line shell application with integrated AI
 ### Building from Source
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/aurora-agent.git
    cd aurora-agent
    ```
 
 2. Build the application:
+
    ```bash
    go build -o aurora
    ```
@@ -39,6 +41,23 @@ Aurora Agent is an interactive command-line shell application with integrated AI
 ### Download Pre-built Binaries
 
 You can download pre-built binaries for your platform from the [Releases](https://github.com/yourusername/aurora-agent/releases) page.
+
+### Quick Install Script (Linux and macOS)
+
+You can install or update Aurora Agent using our installation script:
+
+```bash
+# Using curl
+curl -fsSL https://raw.githubusercontent.com/Firdavs9512/aurora-agent/master/install.sh | bash
+
+# Using wget
+wget -qO- https://raw.githubusercontent.com/Firdavs9512/aurora-agent/master/install.sh | bash
+```
+
+This script will:
+
+- Download the latest version of Aurora Agent
+- Install it to `/usr/local/bin/aurora`
 
 ## Usage
 
@@ -58,18 +77,18 @@ Aurora Agent uses a YAML configuration file located at `~/.config/aurora/config.
 
 ```yaml
 general:
-  default_shell: ""  # User's default shell, leave empty to auto-detect
+  default_shell: "" # User's default shell, leave empty to auto-detect
   history_size: 1000 # Number of commands to keep in history
   shell_commands: [] # Additional shell commands to recognize
   ignored_commands: [] # Shell commands to ignore
 
 openai:
-  api_key: ""        # Your OpenAI API key
+  api_key: "" # Your OpenAI API key
   model: "gpt-3.5-turbo" # Model to use
-  temperature: 0.7   # Response temperature (0.0-1.0)
+  temperature: 0.7 # Response temperature (0.0-1.0)
 
 interface:
-  theme: "default"   # UI theme
+  theme: "default" # UI theme
   prompt_style: "default" # Prompt style
 ```
 
