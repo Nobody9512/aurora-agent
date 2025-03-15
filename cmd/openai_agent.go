@@ -37,7 +37,7 @@ func NewOpenAIAgent(apiKey string) *OpenAIAgent {
 
 	return &OpenAIAgent{
 		client: client,
-		model:  openai.GPT4oLatest, // Default model
+		model:  openai.GPT4o, // Default model
 		messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
