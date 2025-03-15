@@ -41,7 +41,7 @@ func NewOpenAIAgent(apiKey string) *OpenAIAgent {
 		messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: config.SystemPrompt,
+				Content: config.GetSystemPrompt(),
 			},
 		},
 	}

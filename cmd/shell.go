@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/chzyer/readline"
+
+	"aurora-agent/config"
 )
 
 // GetShellCommands retrieves available commands for tab completion
@@ -24,6 +26,12 @@ func GetShellCommands() []readline.PrefixCompleterInterface {
 		if cmd != "" {
 			completions = append(completions, readline.PcItem(cmd))
 		}
+	}
+
+	// Konfiguratsiyadan buyruqlarni qo'shish
+	configCommands := config.GetShellCommands()
+	for _, cmd := range configCommands {
+		completions = append(completions, readline.PcItem(cmd))
 	}
 
 	extraCommands := []string{"exit", "quit", "clear"}

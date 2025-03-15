@@ -12,6 +12,7 @@ import (
 	"golang.org/x/term"
 
 	"aurora-agent/cmd"
+	"aurora-agent/config"
 	"aurora-agent/utils"
 )
 
@@ -37,11 +38,23 @@ func init() {
 			}
 		}
 	}()
+
+	// Load configuration
+	if err := config.LoadConfig(); err != nil {
+		fmt.Printf("Warning: Error loading configuration: %v\n", err)
+		fmt.Println("Using default configuration.")
+		config.CurrentConfig = config.DefaultConfig
+	}
 }
 
 func main() {
 	// Determine user's default shell
 	userShell := cmd.GetDefaultShell()
+
+	// If configuration has a shell, use it
+	if config.CurrentConfig.General.DefaultShell != "" {
+		userShell = config.CurrentConfig.General.DefaultShell
+	}
 
 	// Check for --sudo flag
 	if len(os.Args) > 1 && os.Args[1] == "--sudo" {

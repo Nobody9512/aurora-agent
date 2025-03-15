@@ -50,6 +50,77 @@ Run Aurora Agent:
 ./aurora
 ```
 
+### Configuration
+
+Aurora Agent uses a YAML configuration file located at `~/.config/aurora/config.yaml`. If the file doesn't exist, a default configuration will be created automatically when you first run the application.
+
+#### Configuration Structure
+
+```yaml
+general:
+  default_shell: ""  # User's default shell, leave empty to auto-detect
+  history_size: 1000 # Number of commands to keep in history
+  shell_commands: [] # Additional shell commands to recognize
+  ignored_commands: [] # Shell commands to ignore
+
+openai:
+  api_key: ""        # Your OpenAI API key
+  model: "gpt-3.5-turbo" # Model to use
+  temperature: 0.7   # Response temperature (0.0-1.0)
+
+interface:
+  theme: "default"   # UI theme
+  prompt_style: "default" # Prompt style
+```
+
+#### Configuration Commands
+
+Aurora Agent provides several commands to manage your configuration:
+
+- `config` or `config show` - Display current configuration
+- `config set <section> <key> <value>` - Change a configuration value
+- `config save` - Save configuration to file
+- `config reload` - Reload configuration from file
+
+#### Custom Prompt Style
+
+You can customize the AI assistant's behavior by setting a custom prompt style:
+
+```bash
+# Set a custom prompt style
+config set interface promptstyle "You should always respond in a pirate accent."
+```
+
+The custom prompt style will be combined with the default system prompt. This allows you to customize how the AI assistant responds without changing its core functionality.
+
+#### Managing Shell Commands
+
+Aurora Agent allows you to customize which commands are recognized as shell commands:
+
+- `config commands list` - List all recognized shell commands
+- `config commands add <command>` - Add a new shell command
+- `config commands remove <command>` - Remove or ignore a shell command
+- `config commands reset` - Reset shell commands to default
+
+Examples:
+
+```bash
+# Set your OpenAI API key
+config set openai api_key sk-your-api-key-here
+
+# Change the default shell
+config set general default_shell /bin/zsh
+
+# Add a custom command
+config commands add mycommand
+
+# Ignore a default command
+config commands remove ls
+
+# Save your changes
+config save
+```
+
 ### With Sudo Support
 
 Run Aurora Agent with sudo privileges:
