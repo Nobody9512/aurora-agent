@@ -318,7 +318,8 @@ func (a *OpenAIAgent) StreamQueryWithFunctionCalls(prompt string, writer io.Writ
 		})
 
 		// Print the command output
-		fmt.Print(outputStr)
+		processedOutput := utils.ProcessANSICodes(outputStr)
+		fmt.Print(processedOutput)
 
 		// Get the final response from the AI with the function result
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -342,7 +343,9 @@ func (a *OpenAIAgent) StreamQueryWithFunctionCalls(prompt string, writer io.Writ
 
 		// Print the AI's response
 		finalResponse := resp.Choices[0].Message.Content
-		fmt.Print("\n" + finalResponse + "\n")
+		// Process ANSI codes in the final response
+		processedResponse := utils.ProcessANSICodes(finalResponse)
+		fmt.Print("\n" + processedResponse + "\n")
 
 		// Add the final response to message history
 		a.messages = append(a.messages, openai.ChatCompletionMessage{
