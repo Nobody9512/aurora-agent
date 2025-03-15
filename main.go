@@ -65,7 +65,7 @@ func main() {
 
 	// Readline settings (with Tab completion)
 	rl, err := readline.NewEx(&readline.Config{
-		Prompt:          "> ",
+		Prompt:          getPrompt(),
 		HistoryFile:     "/tmp/shell-history.tmp",
 		AutoComplete:    readline.NewPrefixCompleter(cmd.GetShellCommands()...),
 		InterruptPrompt: "^C",
@@ -105,6 +105,34 @@ func main() {
 
 		args := strings.Fields(input)
 
+		// Handle cd command specially
+		if args[0] == "cd" {
+			// Default to home directory if no argument is provided
+			if len(args) == 1 {
+				homeDir, err := os.UserHomeDir()
+				if err != nil {
+					fmt.Println("Error:", err)
+					continue
+				}
+				err = os.Chdir(homeDir)
+				if err != nil {
+					fmt.Println("Error:", err)
+				} else {
+					rl.SetPrompt(getPrompt())
+				}
+				continue
+			}
+			
+			// Handle cd with path argument
+			err := os.Chdir(args[1])
+			if err != nil {
+				fmt.Println("Error:", err)
+			} else {
+				rl.SetPrompt(getPrompt())
+			}
+			continue
+		}
+
 		// Check for sudo
 		if args[0] == "sudo" {
 			if !sudoEnabled {
@@ -122,6 +150,15 @@ func main() {
 		command := exec.Command(userShell, "-i", "-c", input)
 		utils.RunCommandWithPTY(command)
 	}
+}
+
+// getPrompt returns a prompt string with the current working directory
+func getPrompt() string {
+	pwd, err := os.Getwd()
+	if err != nil {
+		return "> "
+	}
+	return pwd + " > "
 }
 
 // handleAIAgentCommands handles commands related to AI agents
