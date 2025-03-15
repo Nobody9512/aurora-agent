@@ -73,6 +73,8 @@ You can use ANSI escape codes to color text:
 Use appropriate colors to highlight important information, warnings, and errors.
 Example usage: \033[31mThis is red text\033[0m
 
+You can execute terminal commands when asked. For example, if someone asks about the version of a program installed, you can run the appropriate command to check and provide the answer.
+
 You can use the following commands:
 clear - to clear the terminal
 `
