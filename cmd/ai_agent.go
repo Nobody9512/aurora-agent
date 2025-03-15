@@ -147,15 +147,15 @@ func (a *OpenAIAgent) StreamQuery(prompt string, writer io.Writer) error {
 				processedBuffer := utils.ProcessANSICodes(ansiBuffer)
 				fmt.Print(processedBuffer)
 				ansiBuffer = ""
-			} else if config.AnsiStartPattern.MatchString(ansiBuffer) && len(ansiBuffer) > 30 {
+			} else if config.AnsiStartPattern.MatchString(ansiBuffer) && len(ansiBuffer) > 100 {
 				// If buffer contains the start of an ANSI code, but not the end
-				// and buffer length is more than 30, process it
+				// and buffer length is more than 100, process it
 				// This can happen when ANSI code is in incorrect format
 				processedBuffer := utils.ProcessANSICodes(ansiBuffer)
 				fmt.Print(processedBuffer)
 				ansiBuffer = ""
-			} else if len(ansiBuffer) > 20 && !config.AnsiStartPattern.MatchString(ansiBuffer) {
-				// If buffer length is more than 20 and no ANSI code start is found,
+			} else if len(ansiBuffer) > 80 && !config.AnsiStartPattern.MatchString(ansiBuffer) {
+				// If buffer length is more than 80 and no ANSI code start is found,
 				// process it
 				processedBuffer := utils.ProcessANSICodes(ansiBuffer)
 				fmt.Print(processedBuffer)
