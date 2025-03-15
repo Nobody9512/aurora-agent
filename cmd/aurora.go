@@ -27,7 +27,8 @@ func ProcessAuroraCommand(input string) bool {
 		// Print a colored prompt to indicate AI response
 		fmt.Print("\033[36mAurora: \033[0m") // Cyan color for Aurora name
 
-		err := AgentMgr.StreamQuery(input, os.Stdout)
+		// Use function calls for natural language processing
+		err := AgentMgr.StreamQueryWithFunctionCalls(input, os.Stdout)
 		if err != nil {
 			fmt.Printf("\n\033[31mError querying AI agent: %v\033[0m\n", err) // Red error message
 		} else {
