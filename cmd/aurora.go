@@ -165,7 +165,6 @@ func showConfig() {
 	}
 	fmt.Printf("  APIKey: %s\n", apiKey)
 	fmt.Printf("  Model: %s\n", config.CurrentConfig.OpenAI.Model)
-	fmt.Printf("  Temperature: %.1f\n", config.CurrentConfig.OpenAI.Temperature)
 
 	fmt.Println("\033[1m[Interface]\033[0m")
 	fmt.Printf("  Theme: %s\n", config.CurrentConfig.Interface.Theme)
@@ -222,14 +221,6 @@ func setConfigValue(section, key, value string) {
 			if agent, ok := AgentMgr.activeAgent.(*OpenAIAgent); ok {
 				agent.SetModel(value)
 			}
-		case "temperature":
-			var temp float64
-			if _, err := fmt.Sscanf(value, "%f", &temp); err != nil {
-				fmt.Println("\033[31mError: Temperature must be a float\033[0m")
-				return
-			}
-			config.CurrentConfig.OpenAI.Temperature = temp
-			fmt.Printf("\033[32mOpenAI.Temperature = %.1f\033[0m\n", temp)
 		default:
 			fmt.Printf("\033[31mError: '%s' key not found in OpenAI section\033[0m\n", key)
 		}

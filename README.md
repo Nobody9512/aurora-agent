@@ -84,8 +84,7 @@ general:
 
 openai:
   api_key: "" # Your OpenAI API key
-  model: "gpt-3.5-turbo" # Model to use
-  temperature: 0.7 # Response temperature (0.0-1.0)
+  model: "gpt-4o" # Model to use
 
 interface:
   theme: "default" # UI theme

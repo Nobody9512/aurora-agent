@@ -28,9 +28,8 @@ type GeneralConfig struct {
 
 // OpenAIConfig - OpenAI sozlamalari
 type OpenAIConfig struct {
-	APIKey      string  `yaml:"api_key"`
-	Model       string  `yaml:"model"`
-	Temperature float64 `yaml:"temperature"`
+	APIKey string `yaml:"api_key"`
+	Model  string `yaml:"model"`
 }
 
 // InterfaceConfig - interfeys sozlamalari
@@ -48,9 +47,8 @@ var DefaultConfig = AppConfig{
 		IgnoredCommands: []string{},
 	},
 	OpenAI: OpenAIConfig{
-		APIKey:      "",
-		Model:       openai.GPT4o,
-		Temperature: 0.7,
+		APIKey: "",
+		Model:  openai.GPT4o,
 	},
 	Interface: InterfaceConfig{
 		Theme:        "default",
