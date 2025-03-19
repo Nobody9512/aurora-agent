@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/sashabaranov/go-openai"
 	"gopkg.in/yaml.v3"
 )
 
@@ -48,7 +49,7 @@ var DefaultConfig = AppConfig{
 	},
 	OpenAI: OpenAIConfig{
 		APIKey:      "",
-		Model:       "gpt-3.5-turbo",
+		Model:       openai.GPT4o,
 		Temperature: 0.7,
 	},
 	Interface: InterfaceConfig{

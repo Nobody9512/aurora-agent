@@ -218,6 +218,10 @@ func setConfigValue(section, key, value string) {
 		case "model":
 			config.CurrentConfig.OpenAI.Model = value
 			fmt.Printf("\033[32mOpenAI.Model = %s\033[0m\n", value)
+			// Update the model in the active agent
+			if agent, ok := AgentMgr.activeAgent.(*OpenAIAgent); ok {
+				agent.SetModel(value)
+			}
 		case "temperature":
 			var temp float64
 			if _, err := fmt.Sscanf(value, "%f", &temp); err != nil {
