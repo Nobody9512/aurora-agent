@@ -41,9 +41,16 @@ func NewOpenAIAgent(apiKey string) *OpenAIAgent {
 
 	client := openai.NewClient(apiKey)
 
+	// Get model from config, use default if empty or invalid
+	model := config.CurrentConfig.OpenAI.Model
+	if model == "" {
+		// Use default model if not specified
+		model = openai.GPT4o
+	}
+
 	return &OpenAIAgent{
 		client: client,
-		model:  config.CurrentConfig.OpenAI.Model,
+		model:  model,
 		messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
@@ -197,6 +204,12 @@ func (a *OpenAIAgent) StreamQueryWithFunctionCalls(prompt string, writer io.Writ
 				"required": []string{"command"},
 			},
 		},
+	}
+
+	// Validate model before making the API call
+	if a.model == "" {
+		// If model is empty, use a default model
+		a.model = openai.GPT4o
 	}
 
 	// Create a streaming request with function calling
