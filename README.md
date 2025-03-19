@@ -89,7 +89,7 @@ openai:
 
 interface:
   theme: "default" # UI theme
-  prompt_style: "default" # Prompt style
+  system_prompt: "default" # System prompt for AI
 ```
 
 #### Configuration Commands
@@ -101,16 +101,16 @@ Aurora Agent provides several commands to manage your configuration:
 - `config save` - Save configuration to file
 - `config reload` - Reload configuration from file
 
-#### Custom Prompt Style
+#### Custom System Prompt
 
-You can customize the AI assistant's behavior by setting a custom prompt style:
+You can customize the AI assistant's behavior by setting a custom system prompt:
 
 ```bash
-# Set a custom prompt style
-config set interface promptstyle "You should always respond in a pirate accent."
+# Set a custom system prompt
+config set interface systemprompt "You should always respond in a pirate accent."
 ```
 
-The custom prompt style will be combined with the default system prompt. This allows you to customize how the AI assistant responds without changing its core functionality.
+The custom system prompt will be combined with the default system prompt. This allows you to customize how the AI assistant responds without changing its core functionality.
 
 #### Managing Shell Commands
 
