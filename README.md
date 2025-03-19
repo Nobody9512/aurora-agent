@@ -83,13 +83,12 @@ general:
   ignored_commands: [] # Shell commands to ignore
 
 openai:
-  api_key: "" # Your OpenAI API key
-  model: "gpt-3.5-turbo" # Model to use
-  temperature: 0.7 # Response temperature (0.0-1.0)
+  api_key: "" # Your OpenAI API key (can also use OPENAI_API_KEY environment variable)
+  model: "gpt-4o" # Model to use
 
 interface:
   theme: "default" # UI theme
-  prompt_style: "default" # Prompt style
+  system_prompt: "default" # System prompt for AI
 ```
 
 #### Configuration Commands
@@ -101,16 +100,16 @@ Aurora Agent provides several commands to manage your configuration:
 - `config save` - Save configuration to file
 - `config reload` - Reload configuration from file
 
-#### Custom Prompt Style
+#### Custom System Prompt
 
-You can customize the AI assistant's behavior by setting a custom prompt style:
+You can customize the AI assistant's behavior by setting a custom system prompt:
 
 ```bash
-# Set a custom prompt style
-config set interface promptstyle "You should always respond in a pirate accent."
+# Set a custom system prompt
+config set interface systemprompt "You should always respond in a pirate accent."
 ```
 
-The custom prompt style will be combined with the default system prompt. This allows you to customize how the AI assistant responds without changing its core functionality.
+The custom system prompt will be combined with the default system prompt. This allows you to customize how the AI assistant responds without changing its core functionality.
 
 #### Managing Shell Commands
 
@@ -139,6 +138,23 @@ config commands remove ls
 # Save your changes
 config save
 ```
+
+#### API Key Configuration
+
+There are two ways to set your OpenAI API key:
+
+1. Using configuration:
+   ```bash
+   config set openai apikey sk-your-api-key-here
+   config save
+   ```
+
+2. Using environment variable:
+   ```bash
+   export OPENAI_API_KEY=sk-your-api-key-here
+   ```
+
+Aurora Agent will first check the configuration file for the API key, and if not found, it will check the environment variable.
 
 ### With Sudo Support
 

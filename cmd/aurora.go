@@ -165,21 +165,20 @@ func showConfig() {
 	}
 	fmt.Printf("  APIKey: %s\n", apiKey)
 	fmt.Printf("  Model: %s\n", config.CurrentConfig.OpenAI.Model)
-	fmt.Printf("  Temperature: %.1f\n", config.CurrentConfig.OpenAI.Temperature)
 
 	fmt.Println("\033[1m[Interface]\033[0m")
 	fmt.Printf("  Theme: %s\n", config.CurrentConfig.Interface.Theme)
 
-	// Prompt style information
-	promptStyle := config.CurrentConfig.Interface.PromptStyle
-	if promptStyle == "default" || promptStyle == "" {
-		fmt.Printf("  PromptStyle: default\n")
+	// System prompt information
+	systemPrompt := config.CurrentConfig.Interface.SystemPrompt
+	if systemPrompt == "default" || systemPrompt == "" {
+		fmt.Printf("  SystemPrompt: default\n")
 	} else {
-		// If prompt style is long, shorten it
-		if len(promptStyle) > 50 {
-			fmt.Printf("  PromptStyle: \"%s...\"\n", promptStyle[:47])
+		// If system prompt is long, shorten it
+		if len(systemPrompt) > 50 {
+			fmt.Printf("  SystemPrompt: \"%s...\"\n", systemPrompt[:47])
 		} else {
-			fmt.Printf("  PromptStyle: \"%s\"\n", promptStyle)
+			fmt.Printf("  SystemPrompt: \"%s\"\n", systemPrompt)
 		}
 	}
 
@@ -218,14 +217,10 @@ func setConfigValue(section, key, value string) {
 		case "model":
 			config.CurrentConfig.OpenAI.Model = value
 			fmt.Printf("\033[32mOpenAI.Model = %s\033[0m\n", value)
-		case "temperature":
-			var temp float64
-			if _, err := fmt.Sscanf(value, "%f", &temp); err != nil {
-				fmt.Println("\033[31mError: Temperature must be a float\033[0m")
-				return
+			// Update the model in the active agent
+			if agent, ok := AgentMgr.activeAgent.(*OpenAIAgent); ok {
+				agent.SetModel(value)
 			}
-			config.CurrentConfig.OpenAI.Temperature = temp
-			fmt.Printf("\033[32mOpenAI.Temperature = %.1f\033[0m\n", temp)
 		default:
 			fmt.Printf("\033[31mError: '%s' key not found in OpenAI section\033[0m\n", key)
 		}
@@ -235,10 +230,10 @@ func setConfigValue(section, key, value string) {
 		case "theme":
 			config.CurrentConfig.Interface.Theme = value
 			fmt.Printf("\033[32mInterface.Theme = %s\033[0m\n", value)
-		case "promptstyle":
-			config.CurrentConfig.Interface.PromptStyle = value
-			fmt.Printf("\033[32mInterface.PromptStyle = %s\033[0m\n", value)
-			// Prompt style o'zgartirilganda agentni qayta ishga tushirish
+		case "systemprompt":
+			config.CurrentConfig.Interface.SystemPrompt = value
+			fmt.Printf("\033[32mInterface.SystemPrompt = %s\033[0m\n", value)
+			// System prompt o'zgartirilganda agentni qayta ishga tushirish
 			AgentMgr = NewAgentManager()
 		default:
 			fmt.Printf("\033[31mError: '%s' key not found in Interface section\033[0m\n", key)

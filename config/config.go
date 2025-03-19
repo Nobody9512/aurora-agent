@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/sashabaranov/go-openai"
 	"gopkg.in/yaml.v3"
 )
 
@@ -27,15 +28,14 @@ type GeneralConfig struct {
 
 // OpenAIConfig - OpenAI sozlamalari
 type OpenAIConfig struct {
-	APIKey      string  `yaml:"api_key"`
-	Model       string  `yaml:"model"`
-	Temperature float64 `yaml:"temperature"`
+	APIKey string `yaml:"api_key"`
+	Model  string `yaml:"model"`
 }
 
 // InterfaceConfig - interfeys sozlamalari
 type InterfaceConfig struct {
-	Theme       string `yaml:"theme"`
-	PromptStyle string `yaml:"prompt_style"`
+	Theme        string `yaml:"theme"`
+	SystemPrompt string `yaml:"system_prompt"`
 }
 
 // DefaultConfig - standart konfiguratsiya
@@ -47,13 +47,12 @@ var DefaultConfig = AppConfig{
 		IgnoredCommands: []string{},
 	},
 	OpenAI: OpenAIConfig{
-		APIKey:      "",
-		Model:       "gpt-3.5-turbo",
-		Temperature: 0.7,
+		APIKey: "",
+		Model:  openai.GPT4o,
 	},
 	Interface: InterfaceConfig{
-		Theme:       "default",
-		PromptStyle: "default",
+		Theme:        "default",
+		SystemPrompt: "default",
 	},
 }
 
@@ -308,14 +307,14 @@ You can execute terminal commands when asked. For example, if someone asks about
 {{USER_INPUT}}
 `
 
-// GetSystemPrompt - user prompt style-based system prompt
+// GetSystemPrompt - user system prompt based system prompt
 func GetSystemPrompt() string {
-	// If user prompt style exists, add it
-	if CurrentConfig.Interface.PromptStyle != "default" && CurrentConfig.Interface.PromptStyle != "" {
-		// Add user prompt style to system prompt
+	// If user system prompt exists, add it
+	if CurrentConfig.Interface.SystemPrompt != "default" && CurrentConfig.Interface.SystemPrompt != "" {
+		// Add user system prompt to system prompt
 		// Do not change {{USER_INPUT}}
 		customPrompt := strings.Replace(DefaultSystemPrompt, "{{USER_INPUT}}",
-			CurrentConfig.Interface.PromptStyle+"\n\n{{USER_INPUT}}", 1)
+			CurrentConfig.Interface.SystemPrompt+"\n\n{{USER_INPUT}}", 1)
 		return customPrompt
 	}
 
