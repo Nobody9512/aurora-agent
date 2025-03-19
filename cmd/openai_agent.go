@@ -24,12 +24,18 @@ type OpenAIAgent struct {
 
 // NewOpenAIAgent creates a new OpenAI agent
 func NewOpenAIAgent(apiKey string) *OpenAIAgent {
+	// If apiKey is empty, try to get it from config first, then from environment variable
 	if apiKey == "" {
-		// Try to get API key from environment variable
-		apiKey = os.Getenv("OPENAI_API_KEY")
+		// Try to get API key from config
+		apiKey = config.CurrentConfig.OpenAI.APIKey
+
+		// If still empty, try to get from environment variable
 		if apiKey == "" {
-			log.Fatal("Warning: OPENAI_API_KEY not set. Using demo mode.")
-			os.Exit(1)
+			apiKey = os.Getenv("OPENAI_API_KEY")
+			if apiKey == "" {
+				log.Fatal("Error: OpenAI API key not found in config or environment variable (OPENAI_API_KEY).")
+				os.Exit(1)
+			}
 		}
 	}
 
@@ -37,7 +43,7 @@ func NewOpenAIAgent(apiKey string) *OpenAIAgent {
 
 	return &OpenAIAgent{
 		client: client,
-		model:  config.CurrentConfig.OpenAI.Model, // Use configured model instead of static value
+		model:  config.CurrentConfig.OpenAI.Model,
 		messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,

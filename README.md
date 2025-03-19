@@ -83,7 +83,7 @@ general:
   ignored_commands: [] # Shell commands to ignore
 
 openai:
-  api_key: "" # Your OpenAI API key
+  api_key: "" # Your OpenAI API key (can also use OPENAI_API_KEY environment variable)
   model: "gpt-4o" # Model to use
 
 interface:
@@ -138,6 +138,23 @@ config commands remove ls
 # Save your changes
 config save
 ```
+
+#### API Key Configuration
+
+There are two ways to set your OpenAI API key:
+
+1. Using configuration:
+   ```bash
+   config set openai apikey sk-your-api-key-here
+   config save
+   ```
+
+2. Using environment variable:
+   ```bash
+   export OPENAI_API_KEY=sk-your-api-key-here
+   ```
+
+Aurora Agent will first check the configuration file for the API key, and if not found, it will check the environment variable.
 
 ### With Sudo Support
 
