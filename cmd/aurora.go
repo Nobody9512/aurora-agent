@@ -11,7 +11,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 )
 
 // Global agent manager instance
@@ -38,12 +37,12 @@ func ProcessAuroraCommand(input string) bool {
 		fmt.Print("\033[36mAurora: \033[0m") // Cyan color for Aurora name
 
 		// Use function calls for natural language processing
-		err := AgentMgr.StreamQueryWithFunctionCalls(input, os.Stdout)
+		err := AgentMgr.StreamQueryWithFunctionCalls(input)
 		if err != nil {
 			fmt.Printf("\n\033[31mError querying AI agent: %v\033[0m\n", err) // Red error message
-		} else {
-			fmt.Println() // Add a newline after the streamed response
 		}
+
+		// No need to add a newline here as StreamQueryWithFunctionCalls now adds one
 
 		return true
 	}

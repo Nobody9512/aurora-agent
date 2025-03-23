@@ -69,10 +69,10 @@ func (m *AgentManager) StreamQuery(prompt string, writer io.Writer) error {
 }
 
 // StreamQueryWithFunctionCalls sends a prompt to the active AI agent, handles function calls, and streams the response
-func (m *AgentManager) StreamQueryWithFunctionCalls(prompt string, writer io.Writer) error {
+func (m *AgentManager) StreamQueryWithFunctionCalls(prompt string) error {
 	if m.activeAgent == nil {
 		return fmt.Errorf("no active agent set")
 	}
 
-	return m.activeAgent.StreamQueryWithFunctionCalls(prompt, writer)
+	return m.activeAgent.StreamQueryWithFunctionCalls(prompt)
 }

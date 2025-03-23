@@ -28,7 +28,7 @@ type AIAgent interface {
 	// StreamQuery sends a prompt to the AI and streams the response to the writer
 	StreamQuery(prompt string, writer io.Writer) error
 	// StreamQueryWithFunctionCalls sends a prompt to the AI, handles function calls, and streams the response
-	StreamQueryWithFunctionCalls(prompt string, writer io.Writer) error
+	StreamQueryWithFunctionCalls(prompt string) error
 	// Name returns the name of the agent
 	Name() string
 }
