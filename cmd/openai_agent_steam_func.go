@@ -58,6 +58,12 @@ func (a *OpenAIAgent) StreamQueryWithFunctionCalls(prompt string) error {
 				}
 				// Continue the loop to get more function calls
 				continue
+			} else if functionName == "read_file" {
+				if err := a.handleReadFile(functionName, functionCall); err != nil {
+					return err
+				}
+				// Continue the loop to get more function calls
+				continue
 			}
 		}
 
