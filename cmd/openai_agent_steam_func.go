@@ -45,12 +45,20 @@ func (a *OpenAIAgent) StreamQueryWithFunctionCalls(prompt string) error {
 		}
 
 		// Handle function call if present
-		if isFunctionCall && functionName == "execute_command" {
-			if err := a.handleExecuteCommand(functionName, functionCall); err != nil {
-				return err
+		if isFunctionCall {
+			if functionName == "execute_command" {
+				if err := a.handleExecuteCommand(functionName, functionCall); err != nil {
+					return err
+				}
+				// Continue the loop to get more function calls
+				continue
+			} else if functionName == "pwd" {
+				if err := a.handlePwd(functionName, functionCall); err != nil {
+					return err
+				}
+				// Continue the loop to get more function calls
+				continue
 			}
-			// Continue the loop to get more function calls
-			continue
 		}
 
 		// Add assistant response to history if no function call

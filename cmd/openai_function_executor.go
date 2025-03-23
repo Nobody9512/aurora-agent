@@ -27,6 +27,15 @@ func (a *OpenAIAgent) getAvailableFunctions() []openai.FunctionDefinition {
 				"required": []string{"command"},
 			},
 		},
+		{
+			Name:        "pwd",
+			Description: "Print current working directory",
+			Parameters: map[string]interface{}{
+				"type":       "object",
+				"properties": map[string]interface{}{},
+				"required":   []string{},
+			},
+		},
 	}
 }
 
@@ -73,6 +82,41 @@ func (a *OpenAIAgent) handleExecuteCommand(functionName string, functionCall str
 	// Print the command output
 	processedOutput := utils.ProcessANSICodes(outputStr)
 	fmt.Print(processedOutput)
+
+	// Add a newline after command output for better readability
+	fmt.Print("\n")
+
+	return nil
+}
+
+// handlePwd gets the current working directory and adds the result to the message history
+func (a *OpenAIAgent) handlePwd(functionName string, functionCall string) error {
+	// Execute the command
+	cmd := exec.Command("pwd")
+	output, err := cmd.CombinedOutput()
+	outputStr := string(output)
+
+	// Add function call to message history
+	a.messages = append(a.messages, openai.ChatCompletionMessage{
+		Role: openai.ChatMessageRoleAssistant,
+		FunctionCall: &openai.FunctionCall{
+			Name:      functionName,
+			Arguments: functionCall,
+		},
+	})
+
+	// Add function result to message history
+	result := FunctionCallResult{
+		Name:    functionName,
+		Output:  outputStr,
+		Success: err == nil,
+	}
+	resultJSON, _ := json.Marshal(result)
+	a.messages = append(a.messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleFunction,
+		Name:    functionName,
+		Content: string(resultJSON),
+	})
 
 	// Add a newline after command output for better readability
 	fmt.Print("\n")
