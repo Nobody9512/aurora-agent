@@ -187,6 +187,9 @@ func (a *OpenAIAgent) StreamQueryWithFunctionCalls(prompt string) error {
 			processedOutput := utils.ProcessANSICodes(outputStr)
 			fmt.Print(processedOutput)
 
+			// Add a newline after command output for better readability
+			fmt.Print("\n")
+
 			// Continue the loop to get more function calls
 			continue
 		}
@@ -198,6 +201,9 @@ func (a *OpenAIAgent) StreamQueryWithFunctionCalls(prompt string) error {
 				Content: fullResponse,
 			})
 		}
+
+		// Add a newline at the end of the response for better readability
+		fmt.Print("\n")
 
 		// If we reach here with no function call, exit the loop
 		if !isFunctionCall {

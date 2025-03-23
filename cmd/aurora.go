@@ -40,9 +40,9 @@ func ProcessAuroraCommand(input string) bool {
 		err := AgentMgr.StreamQueryWithFunctionCalls(input)
 		if err != nil {
 			fmt.Printf("\n\033[31mError querying AI agent: %v\033[0m\n", err) // Red error message
-		} else {
-			fmt.Println() // Add a newline after the streamed response
 		}
+
+		// No need to add a newline here as StreamQueryWithFunctionCalls now adds one
 
 		return true
 	}
