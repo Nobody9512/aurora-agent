@@ -6,6 +6,8 @@ Aurora Agent is an interactive command-line shell application with integrated AI
 
 - **Interactive Shell**: Command history, tab completion, and familiar shell experience
 - **AI Integration**: Built-in support for AI agents (OpenAI, Claude)
+- **Autonomous Command Execution**: AI assistant can execute multiple commands in sequence without user intervention, automatically trying alternative approaches when commands fail
+- **Proactive Problem Solving**: Smart handling of command failures with automatic fallbacks and alternative solutions
 - **Sudo Support**: Execute privileged commands with sudo authentication
 - **ANSI Color Support**: Rich terminal output with color highlighting
 - **Custom Command Processing**: Special handling for Aurora-specific commands
@@ -182,6 +184,32 @@ Any input that contains "aurora" or is not recognized as a shell command will be
 ```
 > aurora what is the weather today?
 ```
+
+### Autonomous Command Execution
+
+Aurora Agent can intelligently execute multiple commands in sequence to solve complex problems:
+
+```
+> aurora check python packages and their versions
+
+Aurora: 
+Running command: pip list
+Package      Version
+------------ -------
+pip          24.0
+setuptools   69.1.0
+wheel        0.43.0
+numpy        1.26.4
+pandas       2.2.1
+// ... more packages ...
+
+Above is a list of installed Python packages on your system with their versions.
+```
+
+The AI assistant will:
+- Execute commands in sequence without requiring user confirmation for safe operations
+- Automatically try alternate approaches if a command fails
+- Only ask for confirmation when operations might modify system state, require elevated privileges, or use significant resources
 
 ### Switching AI Agents
 
