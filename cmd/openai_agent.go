@@ -62,3 +62,11 @@ func (a *OpenAIAgent) Name() string {
 func (a *OpenAIAgent) SetModel(model string) {
 	a.model = model
 }
+
+// StreamQueryWithFunctionCallsV2 is the new refactored version of StreamQueryWithFunctionCalls
+// It will replace StreamQueryWithFunctionCalls once the refactoring is complete
+func (a *OpenAIAgent) StreamQueryWithFunctionCallsV2(prompt string) error {
+	// For now, just call the original function
+	// This will be updated to use the new refactored functions
+	return a.StreamQueryWithFunctionCalls(prompt)
+}
