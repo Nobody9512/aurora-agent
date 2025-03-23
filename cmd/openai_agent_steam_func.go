@@ -14,7 +14,7 @@ import (
 )
 
 // StreamQueryWithFunctionCalls sends a prompt to OpenAI, handles function calls, and streams the response
-func (a *OpenAIAgent) StreamQueryWithFunctionCalls(prompt string, writer io.Writer) error {
+func (a *OpenAIAgent) StreamQueryWithFunctionCalls(prompt string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
