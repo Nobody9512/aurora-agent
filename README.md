@@ -1,6 +1,6 @@
 # Aurora Agent
 
-[![License: MIT][license_badge]][license_link]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub Stars](https://img.shields.io/github/stars/Firdavs9512/aurora-agent)](https://github.com/Firdavs9512/aurora-agent/stargazers)
 
 Aurora Agent is an interactive command-line shell application with integrated AI capabilities. It provides a seamless interface between traditional shell commands and AI-powered assistance.
