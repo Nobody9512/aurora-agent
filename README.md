@@ -1,5 +1,8 @@
 # Aurora Agent
 
+[![License: MIT][license_badge]][license_link]
+[![GitHub Stars](https://img.shields.io/github/stars/Firdavs9512/aurora-agent)](https://github.com/Firdavs9512/aurora-agent/stargazers)
+
 Aurora Agent is an interactive command-line shell application with integrated AI capabilities. It provides a seamless interface between traditional shell commands and AI-powered assistance.
 
 ## Features
@@ -146,6 +149,7 @@ config save
 There are two ways to set your OpenAI API key:
 
 1. Using configuration:
+
    ```bash
    config set openai apikey sk-your-api-key-here
    config save
@@ -192,7 +196,7 @@ Aurora Agent can intelligently execute multiple commands in sequence to solve co
 ```
 > aurora check python packages and their versions
 
-Aurora: 
+Aurora:
 Running command: pip list
 Package      Version
 ------------ -------
@@ -207,6 +211,7 @@ Above is a list of installed Python packages on your system with their versions.
 ```
 
 The AI assistant will:
+
 - Execute commands in sequence without requiring user confirmation for safe operations
 - Automatically try alternate approaches if a command fails
 - Only ask for confirmation when operations might modify system state, require elevated privileges, or use significant resources
