@@ -14,7 +14,7 @@ Aurora Agent is an interactive command-line shell application with integrated AI
 - **Sudo Support**: Execute privileged commands with sudo authentication
 - **ANSI Color Support**: Rich terminal output with color highlighting
 - **Custom Command Processing**: Special handling for Aurora-specific commands
-- **Cross-Platform Support**: Available for Windows, macOS, and Linux (amd64 and arm64)
+- **Cross-Platform Support**: Available for macOS, Linux (amd64 and arm64)
 
 ## Installation
 
